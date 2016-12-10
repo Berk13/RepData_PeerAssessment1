@@ -1,10 +1,6 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
-```{r setup}
+# Reproducible Research: Peer Assessment 1
+
+```r
 knitr::opts_chunk$set(echo = TRUE, 
                       message = FALSE,
                       warning = FALSE,
@@ -13,13 +9,48 @@ knitr::opts_chunk$set(echo = TRUE,
 
 library(readr)
 library(dplyr)
+```
+
+```
+## 
+## Attaching package: 'dplyr'
+```
+
+```
+## The following objects are masked from 'package:stats':
+## 
+##     filter, lag
+```
+
+```
+## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+```
+
+```r
 library(lubridate)
+```
+
+```
+## 
+## Attaching package: 'lubridate'
+```
+
+```
+## The following object is masked from 'package:base':
+## 
+##     date
+```
+
+```r
 library(ggplot2)
 ```
 
 
 ## Loading and preprocessing the data
-```{r loading.data}
+
+```r
 if(!file.exists("activity.csv")) {
     if(!file.exists("activity.zip")) {
         stop("Coudn't find activity.csv or activity.zip")
@@ -33,7 +64,8 @@ raw.activity.data <-
 ```
 
 ## What is mean total number of steps taken per day?  
-``` {r calculate.mean}
+
+```r
 daily.steps.na.rm <- 
     raw.activity.data %>% 
     group_by(date) %>%
@@ -49,7 +81,8 @@ median.steps <-
     median()
 ```
 
-```{r plot.histogram}
+
+```r
 daily.steps.na.rm %>% 
     ggplot(aes(x = total.steps)) +
     geom_histogram(binwidth = 1000,
@@ -67,13 +100,16 @@ daily.steps.na.rm %>%
     theme_minimal()
 ```
 
+![](PA1_template_files/figure-html/plot.histogram-1.png)<!-- -->
+
 If we ignore missing values we get:  
-mean of total steps per day: `r mean.steps` *(blue dash line on plot)*  
-median of total steps per day: `r median.steps` *(red dash line on plot)*  
+mean of total steps per day: 9354.2 *(blue dash line on plot)*  
+median of total steps per day: 10395 *(red dash line on plot)*  
 
 ## What is the average daily activity pattern?
 
-```{r plot.time.series}
+
+```r
 activity.pattern <- 
     raw.activity.data %>% 
     group_by(interval) %>%
@@ -92,7 +128,10 @@ activity.pattern %>%
     theme_minimal()
 ```
 
-``` {r calculate.maximum.steps.interval}
+![](PA1_template_files/figure-html/plot.time.series-1.png)<!-- -->
+
+
+```r
 max.steps <-
     activity.pattern$average.steps %>% 
     max()
@@ -102,21 +141,23 @@ max.steps.interval <-
               interval[average.steps == max.steps])
 ```
 
-In daily pattern we see `r max.steps` maximum of steps at `r max.steps.interval` interval.
+In daily pattern we see 206.17 maximum of steps at 835 interval.
 
 ## Imputing missing values
 
-``` {r count.na}
+
+```r
 na.count <-
     raw.activity.data$steps %>% 
     is.na() %>% 
     sum()
 ```
 
-There are `r na.count` missing values in original data.
+There are 2304 missing values in original data.
 We'll use mean values for coresponding 5 minutes intervals to fill them in.
 
-```{r fill.in.na}
+
+```r
 filled.activity.data <-
     raw.activity.data %>%
     inner_join(activity.pattern) %>%
@@ -127,7 +168,8 @@ filled.activity.data <-
     select(-average.steps)
 ```
 
-``` {r calculate.mean.for.filled.data}
+
+```r
 filled.daily.steps <- 
     filled.activity.data %>% 
     group_by(date) %>%
@@ -144,7 +186,8 @@ filled.median.steps <-
     round(1)
 ```
 
-```{r filled.plot.histogram}
+
+```r
 filled.daily.steps %>% 
     ggplot(aes(x = total.steps)) +
     geom_histogram(binwidth = 1000,
@@ -162,13 +205,16 @@ filled.daily.steps %>%
     theme_minimal()
 ```
 
+![](PA1_template_files/figure-html/filled.plot.histogram-1.png)<!-- -->
+
 If we fill in missing values with 5-minutes interval averages we get:  
-mean of total steps per day: `r filled.mean.steps %>% as.character()`
-median of total steps per day: `r filled.median.steps %>% as.character()`
+mean of total steps per day: 10766.2
+median of total steps per day: 10766.1
 *(single blue dash line on plot as mean and median are very close)*  
 
 ## Are there differences in activity patterns between weekdays and weekends?
-```{r weekday.plot}
+
+```r
 weekday.activity.data <- 
     filled.activity.data %>% 
     mutate(day.of.week = 
@@ -193,4 +239,6 @@ weekday.activity.data %>%
          y = "steps") +
     theme_minimal()
 ```
+
+![](PA1_template_files/figure-html/weekday.plot-1.png)<!-- -->
 
